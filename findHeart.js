@@ -27,17 +27,17 @@ class Field {
         }
         this.generateField();
         this.setheartLocation();
-        this.setPlayerLocation(this.playerX, this.playerY);
+        this.setPlayerLocation(this.playerX, this.playerY); // will be interesting to start player at a random location instead of 0/0, but following specification
     }
 
     generateField() {
         for (let x=0; x<row ; x++) {
             for (let y = 0; y<col; y++) { // create the columns of each row
                 // const prob = Math.random();
-                // if (randomer.BOOLEAN.IS())
-                //     this.field[y][x] = hole;
+                // if (randomer.BOOLEAN.IS()) // 50/50 chance for a field location to be a hole, percentage is too high
+                //     this.field[x][y] = hole;
                 // else            
-                    this.field[x][y] = fieldCharacter; // paint the whole field first
+                this.field[x][y] = fieldCharacter; // paint the whole field first
             }
         }
     }
@@ -46,8 +46,8 @@ class Field {
 
         // level of difficulty, 1 = 10% hole, 2 = 20%, 3 = 30% or 4 = 40% of total grid size
         // increasing level of difficulty also has a higher chance of not having a path to heart area.
-        
-        for (let i=0; i<( (row * col) * (this.level /10) ); i++) {
+        const obstacleNumber = (row * col) * (this.level /10);
+        for (let i=0; i<obstacleNumber; i++) {
             let x = 0, y = 0;
             do {
                 x = randomer.NUMBER.INTEGER(1, row) - 1;
@@ -124,7 +124,7 @@ class Field {
     askQuestion() {
         let ans = "";
         do {
-            ans = prompt('Which way? ').toUpperCase();
+            ans = prompt('Which way (u-up, d-down, l-left or r-right)? ').toUpperCase();
         } while (ans != 'Q' && ans != 'U' && ans != 'D' && ans != 'L' && ans != 'R');
         return ans;
     }
@@ -147,16 +147,20 @@ class Field {
         let answer = "";
         let gameEnd = false;
 
+        console.log("Welcome to this Find Heart game.");
+        console.log("The objective is to move ☺ towards ❤  and avoid colliding into any O or moving out of the Grid box.")
         answer = this.askLevel();
-        if (answer == 'Q')
+        if (answer == 'Q') {
+            console.log("You quit this game! Come back again soon.");
             return; // user didn't choose level but choose Q
+        }
 
         this.setObstacle();
     
         while ( ! gameEnd ) {
             this.print();
             if ( ( answer = this.askQuestion() ) == 'Q') {// get direction before checking if it is Q
-                console.log("You quit this game!");
+                console.log("You quit this game! Come back again soon.");
                 gameEnd = true;
             }
             else if (! this.movePlayer(answer) ) {
