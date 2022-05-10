@@ -11,8 +11,6 @@ const heart = '❤'; // '^';                // objective
 const hole = 'O';               // hazzard
 const fieldCharacter = '░';     //' ';     // safe play flatform
 const playerCharacter = '☺'; // '*';      // play character to move
-const row = 13;     // horizontal grid field change row values to use different grid size
-const col = 13;     // vertical grid field change col values to use different grid size
 
 class Field {
     field = [];
@@ -21,18 +19,23 @@ class Field {
         this.playerX = 0; // location of play character
         this.playerY = 0; // location of play character
         this.level = 0;
+        this.row = 0;     // horizontal grid field change row values to use different grid size
+        this.col = 0;     // vertical grid field change col values to use different grid size
+    }
 
-        for (let i=0; i<row; i++) {
+    initField() {
+        for (let i=0; i<this.row; i++) {
             this.field[i] = []; // create rows first
         }
         this.generateField();
         this.setheartLocation();
         this.setPlayerLocation(this.playerX, this.playerY); // will be interesting to start player at a random location instead of 0/0, but following specification
+        this.setObstacle();
     }
 
     generateField() {
-        for (let x=0; x<row ; x++) {
-            for (let y = 0; y<col; y++) { // create the columns of each row
+        for (let x=0; x<this.row ; x++) {
+            for (let y = 0; y<this.col; y++) { // create the columns of each row
                 // const prob = Math.random();
                 // if (randomer.BOOLEAN.IS()) // 50/50 chance for a field location to be a hole, percentage is too high
                 //     this.field[x][y] = hole;
@@ -46,12 +49,12 @@ class Field {
 
         // level of difficulty, 1 = 10% hole, 2 = 20%, 3 = 30% or 4 = 40% of total grid size
         // increasing level of difficulty also has a higher chance of not having a path to heart area.
-        const obstacleNumber = (row * col) * (this.level /10);
+        const obstacleNumber = (this.row * this.col) * (this.level /10);
         for (let i=0; i<obstacleNumber; i++) {
             let x = 0, y = 0;
             do {
-                x = randomer.NUMBER.INTEGER(1, row) - 1;
-                y = randomer.NUMBER.INTEGER(1, col) - 1;
+                x = randomer.NUMBER.INTEGER(1, this.row) - 1;
+                y = randomer.NUMBER.INTEGER(1, this.col) - 1;
             } // randomly place HOLE on the field, avoid placing on the same place or over a heart or PLAYERCHARACTER position
             while (this.field[x][y] != fieldCharacter); // optimized
             //while (this.field[x][y] == heart || this.field[x][y] == playerCharacter || this.field[x][y] == hole);
@@ -62,8 +65,8 @@ class Field {
     }
 
     setheartLocation() {
-        const x = randomer.NUMBER.INTEGER(1, row) - 1;
-        const y = randomer.NUMBER.INTEGER(1, col) - 1;
+        const x = randomer.NUMBER.INTEGER(1, this.row) - 1;
+        const y = randomer.NUMBER.INTEGER(1, this.col) - 1;
         this.field[x][y] = heart;
         // console.log("pos ", this.heartX, this.heartY);
     }
@@ -94,7 +97,7 @@ class Field {
                 this.playerY++;
                 break;
         }
-        if ( (this.playerX < 0 || this.playerX > (row-1) ) || this.playerY < 0 || this.playerY > (col-1) ) {
+        if ( (this.playerX < 0 || this.playerX > (this.row-1) ) || this.playerY < 0 || this.playerY > (this.col-1) ) {
             console.log("Out of bounds - Game End!");
             return false;
         }
@@ -124,7 +127,7 @@ class Field {
     askQuestion() {
         let ans = "";
         do {
-            ans = prompt('Which way (u-up, d-down, l-left or r-right)? ').toUpperCase();
+            ans = prompt('Which way u-up, d-down, l-left, r-right or q-quit? ').toUpperCase();
         } while (ans != 'Q' && ans != 'U' && ans != 'D' && ans != 'L' && ans != 'R');
         return ans;
     }
@@ -134,12 +137,35 @@ class Field {
         do {
             // prompt for level of difficulty, 1 = 10% hole, 2 = 20%, 3 = 30% or 4 = 40%
             // increasing level of difficulty also has a higher chance of not having a path to heart area.
-            ans = prompt('Select difficulty level 1, 2 or 3 or 4 or Q to quit? ').toUpperCase();
+            ans = prompt('Select difficulty level 1, 2 or 3 or 4 or q to quit? ').toUpperCase();
         } while (ans != 'Q' && ans != '1' && ans != '2' && ans != '3' && ans != '4');
         
+        // not testing for 'Q' as this will quit the program
         (ans == '1') ? this.level = 1 : (ans == '2') ? this.level = 2 : (ans == '3') ? this.level = 3 : this.level = 4;
         
         //console.log(this.level);
+        return ans;
+    }
+
+    askGridSize() {
+        let ans = "";
+        do {
+            ans = prompt('Select a Grid size, 1 for 10x10, 2 for 13x13, 3 for 20x20 or q to quit? ').toUpperCase();
+        } while (ans != 'Q' && ans != '1' && ans != '2' && ans != '3');
+        switch (ans) { // set desired grid size, not testing for 'Q' as this will quit the program
+            case '1':
+                this.row = 10;
+                this.col = 10;
+                break;
+            case '2':
+                this.row = 13;
+                this.col = 13;
+                break;
+            case '3':
+                this.row = 20;
+                this.col = 20;
+                break;
+        }       
         return ans;
     }
 
@@ -149,13 +175,18 @@ class Field {
 
         console.log("Welcome to this Find Heart game.");
         console.log("The objective is to move ☺ towards ❤  and avoid colliding into any O or moving out of the Grid box.")
+        answer = this.askGridSize();
+        if (answer == 'Q') {
+            console.log("You quit this game! Come back again soon.");
+            return; // user didn't choose grid size but choose Q
+        }
+
         answer = this.askLevel();
         if (answer == 'Q') {
             console.log("You quit this game! Come back again soon.");
             return; // user didn't choose level but choose Q
         }
-
-        this.setObstacle();
+        this.initField();
     
         while ( ! gameEnd ) {
             this.print();
