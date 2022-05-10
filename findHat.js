@@ -15,16 +15,12 @@ class Field {
     constructor() {
         this.playerX = 0; // location of play character
         this.playerY = 0; // location of play character
-
-        this.hatX = 0;
-        this.hatY = 0;
+        this.level = 0;
 
         for (let i=0; i<col; i++) {
             this.field[i] = [];
         }
         this.generateField();
-        this.setHatLocation();
-        this.setPlayerLocation(this.playerX, this.playerY);
     }
 
     generateField() {
@@ -39,10 +35,20 @@ class Field {
         }
     }
     
+    setObstacle() {
+
+        for (let i=0; i<this.level * 10; i++) {
+            const x = randomer.NUMBER.INTEGER(1, 10) - 1;
+            const y = randomer.NUMBER.INTEGER(1, 10) - 1;
+            this.field[x][y] = hole;
+            // console.log("pos ", this.hatX, this.hatY);
+        }
+    }
+
     setHatLocation() {
-        this.hatX = randomer.NUMBER.INTEGER(1, 10) - 1;
-        this.hatY = randomer.NUMBER.INTEGER(1, 10) - 1;
-        this.field[this.hatX][this.hatY] = hat;
+        const x = randomer.NUMBER.INTEGER(1, 10) - 1;
+        const y = randomer.NUMBER.INTEGER(1, 10) - 1;
+        this.field[x][y] = hat;
         // console.log("pos ", this.hatX, this.hatY);
     }
 
@@ -89,13 +95,22 @@ class Field {
     }
 
     runGame() {
-        let direction = "";
+        let answer = "";
         let gameEnd = false
+
+        answer = this.askLevel();
+        if (answer == 'Q')
+            return; // user didn't choose level but choose Q
+
+        this.setObstacle();
+        this.setHatLocation();
+        this.setPlayerLocation(this.playerX, this.playerY);
+    
         while ( ! gameEnd ) {
             this.print();
-            if ( ( direction = this.askQuestion() ) == 'Q') // get direction before checking if it is Q
+            if ( ( answer = this.askQuestion() ) == 'Q') // get direction before checking if it is Q
                 gameEnd = true;
-            else if (! this.movePlayer(direction) ) {
+            else if (! this.movePlayer(answer) ) {
                 // invalid move made by user aborts game
                 // or hit obsticle
                 // or found hat
@@ -118,6 +133,18 @@ class Field {
         do {
             ans = prompt('Which way? ').toUpperCase();
         } while (ans != 'Q' && ans != 'U' && ans != 'D' && ans != 'L' && ans != 'R');
+        return ans;
+    }
+
+    askLevel() {
+        let ans = "";
+        do {
+            ans = prompt('Select difficulty level 1, 2 or 3 or Q to quit? ').toUpperCase();
+        } while (ans != 'Q' && ans != '1' && ans != '2' && ans != '3');
+        
+        (ans == '1') ? this.level = 1 : (ans == '2') ? this.level = 2 : this.level = 3;
+        
+        console.log(this.level);
         return ans;
     }
 } // end of class Field
