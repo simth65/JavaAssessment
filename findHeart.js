@@ -1,6 +1,7 @@
 // instead of finding hat, i have changed the code to finding heart ❤
 // the player have also been changed to ☺ (smiley face)
 
+
 const prompt = require('prompt-sync')({sigint: true});
 const clear = require('clear-screen');
 const randomer = require('complete-randomer');
@@ -10,8 +11,8 @@ const heart = '❤'; // '^';                // objective
 const hole = 'O';               // hazzard
 const fieldCharacter = '░';     //' ';     // safe play flatform
 const playerCharacter = '☺'; // '*';      // play character to move
-const row = 13;     // horizontal grid field
-const col = 13;     // vertical grid field
+const row = 13;     // horizontal grid field change row values to use different grid size
+const col = 13;     // vertical grid field change col values to use different grid size
 
 class Field {
     field = [];
@@ -30,13 +31,13 @@ class Field {
     }
 
     generateField() {
-        for (let y=0; y<row ; y++) {
-            for (let x = 0; x<col; x++) { // create the columns of each row
+        for (let x=0; x<row ; x++) {
+            for (let y = 0; y<col; y++) { // create the columns of each row
                 // const prob = Math.random();
                 // if (randomer.BOOLEAN.IS())
                 //     this.field[y][x] = hole;
                 // else            
-                    this.field[y][x] = fieldCharacter; // paint the whole field first
+                    this.field[x][y] = fieldCharacter; // paint the whole field first
             }
         }
     }
