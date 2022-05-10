@@ -4,13 +4,14 @@
   "description": "Java Script Assessment - May 2022, find your hat game.",
   "main": "index.js",
   "scripts": {
-    "findHat": "node findHat.js"
+    "findHeart": "node findHeart.js"
   },
-  "author": "Andrew Sim Tow Hong",
+  "author": "Sim Tow Hong, Andrew",
   "license": "ISC",
   "dependencies": {
     "clear-screen": "^1.0.0",
     "complete-randomer": "^1.9.1",
-    "prompt-sync": "^4.2.0"
+    "prompt-sync": "^4.2.0",
+    "table": "^6.8.0"
   }
 }
