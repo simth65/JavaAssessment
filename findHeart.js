@@ -18,7 +18,7 @@ class Field {
     constructor() {
         this.playerX = 0; // location of play character
         this.playerY = 0; // location of play character
-        this.level = 0;
+        this.difficultyLevel = 0;
         this.row = 0;     // horizontal grid field change row values to use different grid size
         this.col = 0;     // vertical grid field change col values to use different grid size
     }
@@ -28,8 +28,10 @@ class Field {
             this.field[i] = []; // create rows first
         }
         this.generateField();
-        this.setheartLocation();
+        
+        // setPlayerLocation must run before setheartLocation & setObstacle otherwise heart or hole may be placed on 0/0 location
         this.setPlayerLocation(this.playerX, this.playerY); // will be interesting to start player at a random location instead of 0/0, but following specification
+        this.setHeartLocation();
         this.setObstacle();
     }
 
@@ -49,14 +51,14 @@ class Field {
 
         // level of difficulty, 1 = 10% hole, 2 = 20%, 3 = 30% or 4 = 40% of total grid size
         // increasing level of difficulty also has a higher chance of not having a path to heart area.
-        const obstacleNumber = (this.row * this.col) * (this.level /10);
+        const obstacleNumber = (this.row * this.col) * (this.difficultyLevel /10);
         for (let i=0; i<obstacleNumber; i++) {
             let x = 0, y = 0;
             do {
                 x = randomer.NUMBER.INTEGER(1, this.row) - 1;
                 y = randomer.NUMBER.INTEGER(1, this.col) - 1;
             } // randomly place HOLE on the field, avoid placing on the same place or over a heart or PLAYERCHARACTER position
-            while (this.field[x][y] != fieldCharacter); // optimized
+            while (this.field[x][y] !== fieldCharacter); // optimized
             //while (this.field[x][y] == heart || this.field[x][y] == playerCharacter || this.field[x][y] == hole);
 
             this.field[x][y] = hole;
@@ -64,11 +66,17 @@ class Field {
         }
     }
 
-    setheartLocation() {
-        const x = randomer.NUMBER.INTEGER(1, this.row) - 1;
-        const y = randomer.NUMBER.INTEGER(1, this.col) - 1;
+    setHeartLocation() {
+        let x = 0, y = 0;
+        do {
+            // loop until a fieldCharacter location is found for heart to be placed            
+            x = randomer.NUMBER.INTEGER(1, this.row) - 1;
+            y = randomer.NUMBER.INTEGER(1, this.col) - 1;
+        }
+        while (this.field[x][y] !== fieldCharacter); 
         this.field[x][y] = heart;
-        // console.log("pos ", this.heartX, this.heartY);
+        
+        // console.log("heart pos ", x, y);
     }
 
     setPlayerLocation(x, y) {
@@ -114,7 +122,8 @@ class Field {
     }
 
     print() {
-        clear();
+        clear(); // clear screen before showing changes
+
         // the following code was tested to be working
         // const displayString = this.field.map( row => {
         //     return row.join('');
@@ -127,12 +136,12 @@ class Field {
     askQuestion() {
         let ans = "";
         do {
-            ans = prompt('Which way u-up, d-down, l-left, r-right or q-quit? ').toUpperCase();
+            ans = prompt('Which way do you want to go -> u-up, d-down, l-left, r-right or q-quit? ').toUpperCase();
         } while (ans != 'Q' && ans != 'U' && ans != 'D' && ans != 'L' && ans != 'R');
         return ans;
     }
 
-    askLevel() {
+    askDifficultyLevel() {
         let ans = "";
         do {
             // prompt for level of difficulty, 1 = 10% hole, 2 = 20%, 3 = 30% or 4 = 40%
@@ -140,10 +149,9 @@ class Field {
             ans = prompt('Select difficulty level 1, 2 or 3 or 4 or q to quit? ').toUpperCase();
         } while (ans != 'Q' && ans != '1' && ans != '2' && ans != '3' && ans != '4');
         
-        // not testing for 'Q' as this will quit the program
-        (ans == '1') ? this.level = 1 : (ans == '2') ? this.level = 2 : (ans == '3') ? this.level = 3 : this.level = 4;
+        // not testing for 'Q' here as this will quit the program when this routine exits
+        (ans == '1') ? this.difficultyLevel = 1 : (ans == '2') ? this.difficultyLevel = 2 : (ans == '3') ? this.difficultyLevel = 3 : this.difficultyLevel = 4;
         
-        //console.log(this.level);
         return ans;
     }
 
@@ -173,20 +181,22 @@ class Field {
         let answer = "";
         let gameEnd = false;
 
-        console.log("Welcome to this Find Heart game.");
-        console.log("The objective is to move ☺ towards ❤  and avoid colliding into any O or moving out of the Grid box.")
-        answer = this.askGridSize();
+        console.log("Welcome to Find Heart game....");
+        console.log("The objective is to move ☺ towards ❤ (heart) and avoid falling into any O (Hole) or moving out of the Grid box.")
+        
+        answer = this.askGridSize(); // get grid size
         if (answer == 'Q') {
             console.log("You quit this game! Come back again soon.");
             return; // user didn't choose grid size but choose Q
         }
 
-        answer = this.askLevel();
+        answer = this.askDifficultyLevel(); // get difficulty level
         if (answer == 'Q') {
             console.log("You quit this game! Come back again soon.");
             return; // user didn't choose level but choose Q
         }
-        this.initField();
+
+        this.initField(); // initialise game field
     
         while ( ! gameEnd ) {
             this.print();
