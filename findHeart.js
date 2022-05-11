@@ -105,7 +105,7 @@ class Field {
                 this.playerY++;
                 break;
         }
-        if ( (this.playerX < 0 || this.playerX > (this.row-1) ) || this.playerY < 0 || this.playerY > (this.col-1) ) {
+        if ( this.playerX < 0 || this.playerX > this.row-1 || this.playerY < 0 || this.playerY > this.col-1 ) {
             console.log("Out of bounds - Game End!");
             return false;
         }
